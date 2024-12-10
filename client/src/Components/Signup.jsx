@@ -24,7 +24,7 @@ const Signup = () => {
     
         try {
             const response = await axios.post('http://localhost:3000/auth/signup', { username, email, password });
-    
+     
             if (response.data.status) {
                 navigate("/login");
             } else {
