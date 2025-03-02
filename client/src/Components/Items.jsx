@@ -1,52 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from './NavBar';
+import axios from 'axios';
 import '../Cards1.css';
 
 const Items = () => {
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/items');
+        setItems(response.data);
+      } catch (error) {
+        console.error('Error fetching items:', error);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
   return (
     <>
       <Navbar />
-      <div className="container">
-        <div className="header">
-          <h2>New Item</h2>
-          <button className="go-back-button">Go Back</button>
+      <div className="items-container">
+        <div className="items-list">
+          {items.map((item) => (
+            <div key={item._id} className="item-box">
+              <img src={`http://localhost:3000${item.imageUrl}`} alt={item.title} className="item-image" />
+              <div className="item-details">
+                <h3>{item.title}</h3>
+                <p>Size: {item.size}</p>
+                <p>Condition: {item.condition}</p>
+                <p>Preferences: {item.preferences}</p>
+                <p><strong>Created By:</strong> {item.createdBy?.username || "Unknown"}</p>
+                <p><strong>Email:</strong> {item.createdBy?.email || "Unknown"}</p>
+                
+                {/* Only "View Details" button remains */}
+                <Link to={`/item/${item._id}`}>
+                  <button className="view-item-button">View Details</button>
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="item-details">
-          <div className="item-image">
-            <img
-              src="https://tse1.mm.bing.net/th?id=OIP.rgJQvzlvFIKp-E8vQ0wZ-AHaHa&pid=Api&P=0&h=180"
-              alt="Levis Jeans"
-            />
-          </div>
-          <div className="item-info">
-            <h3>Item Details</h3>
-            <form>
-              <label>Title:</label>
-              <input
-                type="text"
-                defaultValue="Levis Jeans, 2 Years Old, Good Condition"
-              />
-              <label>Size:</label>
-              <input type="text" defaultValue="36 Waist" />
-              <label>Condition:</label>
-              <input
-                type="text"
-                defaultValue="Levis Jeans, 2 Years Old, Good Condition"
-              />
-              <label>Preferences:</label>
-              <input
-                type="text"
-                defaultValue="Shoes, Jackets, Dolls"
-              />
-              <button type="submit" className="post-button">
-                Post
-              </button>
-            </form>
-          </div>
-        </div>
-        <footer>
-          <p>Threads&Thrift. All rights reserved. 2024</p>
-        </footer>
       </div>
     </>
   );

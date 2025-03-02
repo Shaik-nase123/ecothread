@@ -107,3 +107,65 @@ input {
     font-size: 20px;
   }
 }
+.trade-container {
+  padding: 20px;
+}
+
+.trade-boxes {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.trade-box {
+  width: 45%;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.item-details {
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.item-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.propose-trade-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.propose-trade-button:hover {
+  background-color: #0056b3;
+}
+
+.trades-container {
+  padding: 20px;
+}
+
+.trade-details {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.trade-items {
+  display: flex;
+  justify-content: space-between;
+}
+
+.trade-item {
+  width: 45%;
+  text-align: center;
+}

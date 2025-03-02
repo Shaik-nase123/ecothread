@@ -10,10 +10,11 @@ const Navbar = ({ onLogout = () => {} }) => {
 
   return (
     <header>
-      <h1>Threads2Thrift</h1>
+      <h1>Eco Thread Exchange</h1>
       <nav>
-        <Link to="/dashboard">Dashboard</Link>
+        <Link to="/home">Home</Link>
         <Link to="/items">Items</Link>
+        <Link to="/my-items">My Items</Link>
         <Link to="/trades">Trades</Link>
         <Link to="/login" onClick={handleLogoutClick}>
           Logout

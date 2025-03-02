@@ -7,22 +7,26 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
-    axios.defaults.withCredentials=true;
+    axios.defaults.withCredentials = true;
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
-        // Basic validation
+    
         if (!email || !password) {
             console.error("Validation Error: Both fields are required");
             return;
         }
-
+    
         try {
             const response = await axios.post('http://localhost:3000/auth/login', { email, password });
-
+            console.log(response);
+    
             if (response.data.status) {
-                navigate("/home"); // Replace with the target page after login
+                if (response.data.role === 'admin') {
+                    navigate("/admin"); // Redirect to admin page
+                } else {
+                    navigate("/home"); // Redirect to user home page
+                }
             } else {
                 console.error(response.data.message || "Login failed");
             }
@@ -30,6 +34,7 @@ const Login = () => {
             console.error("Error during login:", err.response?.data || err.message);
         }
     };
+    
 
     return (
         <div className='container'>

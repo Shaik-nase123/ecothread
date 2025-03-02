@@ -5,9 +5,9 @@ const ItemSchema = new mongoose.Schema({
     size: { type: String, required: true },
     condition: { type: String, required: true },
     preferences: { type: String },
-    image: { type: String, required: true }, // Path to the uploaded image
+    imageUrl: { type: String, required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });
 
 const Item = mongoose.model('Item', ItemSchema);
-
 export default Item;

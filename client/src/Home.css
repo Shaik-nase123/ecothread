@@ -9,8 +9,10 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #333; /* Dark background */
+  background: url('images/plant.jpg') no-repeat center center fixed; /* Background image */
+  background-size: cover; /* Make the background cover the entire viewport */
   color: #fff;
+  padding-top: 70px; /* Match the height of the navbar */
 }
 
 /* Full-width navbar */
@@ -112,4 +114,65 @@ form button {
 form button:hover {
   background-color: #00e6e6; /* Light teal hover */
   color: #004f4f;
+}
+.exchange-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 20px auto;
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.exchange-image:hover {
+  transform: scale(1.05);
+}
+/* New CSS selectors for the layout */
+.home-welcome-section {
+  display: flex;
+  align-items: center;
+  gap: 40px; /* Space between image and text */
+  max-width: 1200px; /* Adjust as needed */
+  margin: 0 auto; /* Center the content */
+  padding: 20px;
+}
+
+.home-welcome-section img {
+  flex: 1; /* Image takes up 1 part of the space */
+  max-width: 50%; /* Limit image width */
+  height: auto;
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.home-welcome-section img:hover {
+  transform: scale(1.05);
+}
+
+.home-welcome-section .welcome-text {
+  flex: 1; /* Text takes up 1 part of the space */
+  max-width: 50%; /* Limit text width */
+}
+
+.home-welcome-section h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #004f4f; /* Dark teal heading */
+}
+
+.home-welcome-section p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333; /* Dark text for readability */
+  margin-bottom: 20px;
+}
+.welcome-text ol {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+.welcome-text li {
+  margin-bottom: 10px;
+  line-height: 1.6;
 }

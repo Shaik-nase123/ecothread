@@ -1,195 +1,125 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./NavBar";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";  // Import useNavigate from react-router-dom
 import "../Cards2.css";
 
 const Trades = () => {
-  const [item, setItem] = useState({
-    title: "",
-    size: "",
-    condition: "",
-    preferences: "",
-  });
+  const { id } = useParams();
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [myItems, setMyItems] = useState([]);
+  const [selectedMyItemIndex, setSelectedMyItemIndex] = useState(0);
+  const navigate = useNavigate();
 
-  const [image, setImage] = useState(null);
-  const [errors, setErrors] = useState({});
-  const navigate = useNavigate(); // Initialize navigate function
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        // Fetch the selected item (other user's item)
+        const selectedItemResponse = await axios.get(`http://localhost:3000/api/items/${id}`, {
+          withCredentials: true, // Include cookies
+        });
+        setSelectedItem(selectedItemResponse.data);
 
-  const validateForm = () => {
-    const newErrors = {};
+        // Fetch user's own items
+        const myItemsResponse = await axios.get("http://localhost:3000/api/items/my-items", {
+          withCredentials: true, // Include cookies
+        });
 
-    // Title validation: Min 3, Max 100 characters
-    const normalizedTitle = item.title.trim();
-    if (!normalizedTitle) {
-      newErrors.title = "Title is required.";
-    } else if (normalizedTitle.length < 3) {
-      newErrors.title = "Title must be at least 3 characters long.";
-    } else if (normalizedTitle.length > 100) {
-      newErrors.title = "Title must be no more than 100 characters.";
-    }
-
-    // Size validation: Convert to uppercase for comparison
-    const validSizes = ["S", "M", "L", "XL", "XXL"];
-    const normalizedSize = item.size.trim().toUpperCase();
-    if (!normalizedSize) {
-      newErrors.size = "Size is required.";
-    } else if (!validSizes.includes(normalizedSize)) {
-      newErrors.size = `Size must be one of ${validSizes.join(", ")}.`;
-    }
-
-    // Condition validation: Convert to lowercase for case-insensitive matching
-    const validConditions = ["New", "Like New", "Good", "Fair", "Poor"];
-    const normalizedCondition = item.condition.trim().toLowerCase();
-    if (!normalizedCondition) {
-      newErrors.condition = "Condition is required.";
-    } else if (!validConditions.map(cond => cond.toLowerCase()).includes(normalizedCondition)) {
-      newErrors.condition = `Condition must be one of ${validConditions.join(", ")}.`;
-    }
-
-    // Preferences validation: Min 10 characters
-    const normalizedPreferences = item.preferences.trim();
-    if (!normalizedPreferences) {
-      newErrors.preferences = "Preferences are required.";
-    } else if (normalizedPreferences.length < 10) {
-      newErrors.preferences = "Preferences must be at least 10 characters long.";
-    }
-
-    // Image validation: Check for valid image format and size limit (5MB)
-    if (!image) {
-      newErrors.image = "Image is required.";
-    } else {
-      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-      if (!allowedTypes.includes(image.type)) {
-        newErrors.image = "Please upload a valid image (JPG, PNG, JPEG).";
+        setMyItems(myItemsResponse.data);
+      } catch (error) {
+        console.error("Error fetching items:", error);
       }
+    };
 
-      // Validate image size (max size: 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (image.size > maxSize) {
-        newErrors.image = "Image size must be less than 5MB.";
-      }
-    }
+    fetchItems();
+  }, [id]);
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleNextItem = () => {
+    setSelectedMyItemIndex((prevIndex) => (prevIndex + 1) % myItems.length);
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setItem((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
+  const handleProposeTrade = async () => {
+    if (myItems.length === 0) {
+      alert("You have no items to trade.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("title", item.title);
-    formData.append("size", item.size);
-    formData.append("condition", item.condition);
-    formData.append("preferences", item.preferences);
-    formData.append("image", image);
+    const selectedMyItem = myItems[selectedMyItemIndex]._id;
 
     try {
-      const response = await axios.post("http://localhost:3000/api/items/create", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      await axios.post(
+        "http://localhost:3000/api/trades/propose",
+        {
+          proposedTo: selectedItem.createdBy._id,
+          proposedItem: id,
+          requestedItem: selectedMyItem,
         },
-      });
-      alert("Item created successfully!");  // Popup message on success
-      console.log(response.data);
-
-      // Redirect to homepage after success
-      navigate("/home");  // Use navigate() to go to the homepage
-
-      setItem({
-        title: "",
-        size: "",
-        condition: "",
-        preferences: "",
-      });
-      setImage(null);
-      setErrors({});
+        {
+          withCredentials: true, // Include cookies
+        }
+      );
+      alert("Trade proposed successfully!");
+      navigate("/trades");
     } catch (error) {
-      console.error("Error creating item", error);
-      alert("Failed to create item.");
+      console.error("Error proposing trade:", error);
+      alert("Failed to propose trade.");
     }
   };
 
   return (
     <>
       <Navbar />
-      <div className="trades-container">
-        <form onSubmit={handleSubmit} className="item-form">
-          <h1 className="trades-heading">Create New Item</h1>
-          <div className="form-group">
-            <label htmlFor="title">Title:</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={item.title}
-              onChange={handleChange}
-              required
-            />
-            {errors.title && <p className="error-message">{errors.title}</p>}
+      <div className="trade-container">
+        <h1>Propose a Trade</h1>
+        <div className="trade-boxes">
+          {/* LEFT SIDE: Selected Item (Other User's Item) */}
+          <div className="trade-box left">
+            <h2>Selected Item</h2>
+            {selectedItem && (
+              <div className="item-details">
+                <img
+                  src={`http://localhost:3000${selectedItem.imageUrl}`}
+                  alt={selectedItem.title}
+                  className="item-image"
+                />
+                <h3>{selectedItem.title}</h3>
+                <p>Size: {selectedItem.size}</p>
+                <p>Condition: {selectedItem.condition}</p>
+                <p>Preferences: {selectedItem.preferences}</p>
+                <p><strong>Created By:</strong> {selectedItem.createdBy?.username || "Unknown"}</p>
+                <p><strong>Email:</strong> {selectedItem.createdBy?.email || "Unknown"}</p>
+              </div>
+            )}
           </div>
-          <div className="form-group">
-            <label htmlFor="size">Size:</label>
-            <input
-              type="text"
-              id="size"
-              name="size"
-              value={item.size}
-              onChange={handleChange}
-              required
-            />
-            {errors.size && <p className="error-message">{errors.size}</p>}
+
+          {/* RIGHT SIDE: User's Own Items (Scrollable) */}
+          <div className="trade-box right">
+            <h2>Your Items</h2>
+            {myItems.length > 0 ? (
+              <div className="item-details">
+                <img
+                  src={`http://localhost:3000${myItems[selectedMyItemIndex].imageUrl}`}
+                  alt={myItems[selectedMyItemIndex].title}
+                  className="item-image"
+                />
+                <h3>{myItems[selectedMyItemIndex].title}</h3>
+                <p>Size: {myItems[selectedMyItemIndex].size}</p>
+                <p>Condition: {myItems[selectedMyItemIndex].condition}</p>
+                <p>Preferences: {myItems[selectedMyItemIndex].preferences}</p>
+                <p><strong>Created By:</strong> {myItems[selectedMyItemIndex].createdBy?.username || "Unknown"}</p>
+                <p><strong>Email:</strong> {myItems[selectedMyItemIndex].createdBy?.email || "Unknown"}</p>
+                <button onClick={handleNextItem} className="next-item-button">
+                  Next Item
+                </button>
+              </div>
+            ) : (
+              <p>No items available for trade.</p>
+            )}
           </div>
-          <div className="form-group">
-            <label htmlFor="condition">Condition:</label>
-            <input
-              type="text"
-              id="condition"
-              name="condition"
-              value={item.condition}
-              onChange={handleChange}
-              required
-            />
-            {errors.condition && <p className="error-message">{errors.condition}</p>}
-          </div>
-          <div className="form-group">
-            <label htmlFor="preferences">Preferences:</label>
-            <input
-              type="text"
-              id="preferences"
-              name="preferences"
-              value={item.preferences}
-              onChange={handleChange}
-              required
-            />
-            {errors.preferences && <p className="error-message">{errors.preferences}</p>}
-          </div>
-          <div className="form-group">
-            <label htmlFor="image">Upload Image:</label>
-            <input type="file" id="image" onChange={handleImageChange} required />
-            {errors.image && <p className="error-message">{errors.image}</p>}
-          </div>
-          <button type="submit" className="submit-button">
-            Post
-          </button>
-        </form>
+        </div>
+        <button onClick={handleProposeTrade} className="propose-trade-button">
+          Propose Trade
+        </button>
       </div>
     </>
   );
